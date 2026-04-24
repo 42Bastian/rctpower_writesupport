@@ -110,15 +110,13 @@ def communicate_with_server(
 ):
     """Exchange frames with the inverter and decode the response."""
     for attempt in range(retries):
-        print(
-            f"Attempting connection to {host_port} (Attempt {attempt + 1}/{retries})..."
-        )
+#        print(f"Attempting connection to {host_port} (Attempt {attempt + 1}/{retries})...")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             try:
                 sock.settimeout(timeout)
                 sock.connect(host_port)
                 sock.sendall(send_frame)
-                print("*** Frame sent. Waiting for response...")
+#                print("*** Frame sent. Waiting for response...")
 
                 response_frame = ReceiveFrame()
                 buffer_size = 256
@@ -139,7 +137,7 @@ def communicate_with_server(
                     decoded_value = decode_value(
                         response_data_type, response_frame.data
                     )
-                    print(f"*** Response: {decoded_value}")
+#                    print(f"*** Response: {decoded_value}")
                     return decoded_value
 
             except (socket.timeout, socket.gaierror, socket.error) as e:
@@ -226,7 +224,8 @@ def set_value(parameter: str, value: str, host: str) -> str:
     )
     send_data(host_port, frame)
 
-    return f"*** SET SUCCESS: {parameter} = {value} on {host}"
+#    return f"*** SET SUCCESS: {parameter} = {value} on {host}"
+    return f"{parameter} = {value} on {host}"
 
 
 def get_value(parameter: str, host: str) -> str:
@@ -242,6 +241,9 @@ def get_value(parameter: str, host: str) -> str:
         "p_rec_lim[1]",
         "power_mng.use_grid_power_enable",
         "buf_v_control.power_reduction",
+        "battery.soc",
+        "battery.soc2",
+        "battery_placeholder[0].soc",
     ]
 
     if parameter not in valid_parameters:
@@ -249,13 +251,17 @@ def get_value(parameter: str, host: str) -> str:
         show_help()
         sys.exit(1)
 
+    if parameter == "battery.soc2":
+        parameter="battery_placeholder[0].soc"
+
     host_port = (host, DEFAULT_PORT)
     object_info = REGISTRY.get_by_name(parameter)
     frame = make_frame(command=Command.READ, id=object_info.object_id)
     result = communicate_with_server(host_port, frame, object_info.response_data_type)
 
     if result is not None:
-        return f"*** READ SUCCESS: {parameter} = {result}"
+        return f"{parameter} = {result}"
+#        return f"*** READ SUCCESS: {parameter} = {result}"
     return f"### ERROR ### Failed to read parameter '{parameter}'"
 
 
