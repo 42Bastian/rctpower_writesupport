@@ -197,7 +197,7 @@ def set_value(parameter: str, value: str, host: str) -> str:
         value = validate_float(parameter, value, 0.05, 1.0)
 
     elif parameter == "power_mng.soc_max":
-        value = validate_float(parameter, value, 0.0, 1.0)
+        value = validate_float(parameter, value, 0.0, 1.01)
 
     elif parameter in ["power_mng.soc_charge_power", "power_mng.soc_charge"]:
         value = validate_float(parameter, value, -999999, 999999)
